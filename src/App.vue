@@ -1,17 +1,51 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div>
+    <img
+      alt="Dropbox logo"
+      src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Dropbox_logo_2017.svg"
+      width="300"
+    />
+    <!-- <Player /> -->
+    <component :is="currentComponent" />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Player from "./components/Player.vue";
+import Connect from "./components/Connect.vue";
+import { DropboxAuth } from "dropbox";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    Player,
+    Connect,
+  },
+  data() {
+    return {
+      currentComponent: "Player",
+    };
+  },
+  mounted() {
+    let params = new URLSearchParams(window.location.hash.split("#")[1]);
+    this.dbxAuth = new DropboxAuth({ clientId: this.clientId });
+
+    if (params.has("access_token")) {
+      this.dbxAuth.setAccessToken(params.get("access_token"));
+      localStorage.setItem("accessToken", params.get("access_token"));
+      //window.location.hash = "";
+    }
+
+    if (!this.isAuthenticated()) {
+      this.currentComponent = "Connect";
+    }
+  },
+  methods: {
+    isAuthenticated() {
+      return !!this.dbxAuth.getAccessToken();
+    },
+  },
+};
 </script>
 
 <style>
